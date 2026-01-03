@@ -6,6 +6,10 @@ import PricingCart from "../Cart/PricingCart";
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import { useAppDispatch, useAppSelector } from "../../../State/Store";
+import { createOrder } from "../../../State/customer/OrderSlice";
+import { setSelectedAddress } from "../../../State/AuthSlice";
+import { Address } from './../../../types/UserTypes';
 
 const style = {
     position: 'absolute',
@@ -43,6 +47,28 @@ const Checkout = () => {
     const handleClose = () => setOpen(false);
     const handlePaymentChange = (event: any) => { setPayment(event.target.value) }
 
+    const { auth, cart } = useAppSelector(store => store);
+    const dispatch = useAppDispatch();
+
+    const handleAddressChange = (address: Address) => {
+        dispatch(setSelectedAddress(address));
+    };
+
+    const handlePlaceOrder = () => {
+        const jwt = localStorage.getItem("jwt");
+
+        if (!jwt || !auth.selectedAddress) {
+            alert("Vui lòng chọn địa chỉ giao hàng!");
+            return;
+        }
+
+        dispatch(createOrder({
+            jwt,
+            shippingAddress: auth.selectedAddress,
+            paymentMethod: payment,
+        }));
+    };
+
     return (
         <>
             <div className="pt-10 px-5 sm:px-10 md:px-44 lg:px-60 min-h-screen">
@@ -55,8 +81,15 @@ const Checkout = () => {
                         <div className="text-xs font-medium space-y-5">
                             <p>Các địa chỉ đã lưu</p>
                             <div className="space-y-3">
-                                {[1, 1, 1, 1, 1].map((item) => (
-                                    <AddressCard />
+                                {auth.user?.addresses?.map((item: Address) => (
+                                    <AddressCard
+                                        key={item.id}
+                                        address={item}
+                                        // So sánh ID từ object trong Redux
+                                        selectedValue={auth.selectedAddress?.id ?? null}
+                                        // Truyền cả object address để lưu vào store
+                                        onChange={() => handleAddressChange(item)}
+                                    />
                                 ))}
                             </div>
                         </div>
@@ -99,10 +132,16 @@ const Checkout = () => {
                         </div>
                         <div className="border rounded-md">
 
-                            <PricingCart />
+                            {cart.cart && <PricingCart cart={cart.cart} />}
                             <div className="p-5">
-                                <Button fullWidth variant="contained" sx={{ py: "11px" }}>
-                                    Đặt hàng
+                                <Button
+                                    onClick={handlePlaceOrder}
+                                    fullWidth
+                                    variant="contained"
+                                    disabled={!auth.selectedAddress}
+                                    sx={{ py: "11px", bgcolor: "#007bff" }}
+                                >
+                                    Xác nhận đặt hàng
                                 </Button>
                             </div>
                         </div>
@@ -116,7 +155,7 @@ const Checkout = () => {
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={style}>
-                    <AddressForm />
+                    <AddressForm handleClose={handleClose} />
                 </Box>
             </Modal>
         </>

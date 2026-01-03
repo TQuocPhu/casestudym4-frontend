@@ -70,7 +70,12 @@ const Cart = () => {
           </div>
 
           <div className="border rounded-md">
-            <PricingCart />
+            {/* {cart.cart && <PricingCart cart={cart.cart} />} */}
+            {cart.cart ? (
+              <PricingCart cart={cart.cart} />
+            ) : (
+              <div className="p-5 text-center">Đang tải thông tin thanh toán...</div>
+            )}
             <div className="p-5">
               <Button onClick={() => navigate("/checkout")}
                 fullWidth variant="contained" sx={{ py: "11px" }}>

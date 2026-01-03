@@ -1,36 +1,58 @@
 import { Box, Divider } from "@mui/material";
 import { teal } from "@mui/material/colors";
 import React from "react";
+import { Cart } from "../../../types/CartTypes";
 
-const PricingCart = () => {
+interface PricingCartProps {
+  cart: Cart;
+}
+
+const PricingCart = ({ cart }: PricingCartProps) => {
+
+  const totalMrpPrice = cart?.totalMrpPrice || 0;
+  const totalSellingPrice = cart?.totalSellingPrice || 0;
+  const totalItem = cart?.totalItem || 0;
+  const discountAmount = totalMrpPrice - totalSellingPrice;
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  };
+
+
   return (
     <>
       <div className="space-y-3 p-5">
         <div className="flex justify-between items-center">
-          <span>Tổng tiền hàng</span>
-          <span>300000đ</span>
+          <span>Tổng tiền hàng ({totalItem} sản phẩm)</span>
+          <span>{formatCurrency(totalMrpPrice)}</span>
         </div>
 
         <div className="flex justify-between items-center">
-          <span>Giảm giá</span>
-          <span>100000đ</span>
+          <span>Giảm giá trực tiếp</span>
+          <span className="text-green-600">
+            -{formatCurrency(discountAmount)}
+          </span>
         </div>
 
         <div className="flex justify-between items-center">
           <span>Phí giao hàng</span>
-          <span>20000đ</span>
+          <span className="text-gray-500">Miễn phí</span>
         </div>
 
         <div className="flex justify-between items-center">
-          <span>Thuế</span>
-          <Box sx={{ color: teal[500] }}>Miễn phí</Box>
+          <span>Thuế (VAT)</span>
+          <Box sx={{ color: teal[500] }}>Đã bao gồm</Box>
         </div>
       </div>
+
       <Divider />
 
-      <div className="flex justify-between items-center p-5 text-primary-color">
-        <span className="font-semibold">Tổng tiền</span>
-        <span>300000đ</span>
+      <div className="flex justify-between items-center p-5 text-primary-color font-bold text-lg">
+        <span className="text-gray-800">Tổng thanh toán</span>
+        <span className="text-red-600">{formatCurrency(totalSellingPrice)}</span>
       </div>
     </>
   );

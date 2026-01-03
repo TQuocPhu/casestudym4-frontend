@@ -2,6 +2,8 @@ import { Box, Button, Grid, TextField } from '@mui/material'
 import React from 'react'
 import { useFormik } from 'formik'
 import * as Yup from "yup"
+import { useAppDispatch } from '../../../State/Store'
+import { updateUserAddress } from '../../../State/AuthSlice'
 
 const validationAddressFormSchema = Yup.object().shape({
     name: Yup.string()
@@ -23,7 +25,10 @@ const validationAddressFormSchema = Yup.object().shape({
         .required("Vui lòng nhập phường/xã/quận/huyện"),
 })
 
-const AddressForm = () => {
+const AddressForm = ({ handleClose }: { handleClose: () => void }) => {
+
+    const dispatch = useAppDispatch();
+
     const formik = useFormik({
         initialValues: {
             name: '',
@@ -36,7 +41,14 @@ const AddressForm = () => {
         },
         validationSchema: validationAddressFormSchema,
         onSubmit: (values) => {
-            console.log(values)
+            const jwt = localStorage.getItem("jwt");
+            if (jwt) {
+                // Gọi action gửi dữ liệu lên server
+                dispatch(updateUserAddress({ jwt, address: values }));
+                handleClose(); // Đóng modal
+            } else {
+                alert("Bạn cần đăng nhập để thực hiện thao tác này!");
+            }
         },
     })
     return (
