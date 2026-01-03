@@ -1,0 +1,35 @@
+import {combineReducers, configureStore} from '@reduxjs/toolkit'
+import { thunk } from 'redux-thunk'
+import { TypedUseSelectorHook, useDispatch, useSelector, shallowEqual } from "react-redux"
+import sellerSlice from './seller/sellerSlice'
+import sellerProductSlice from './seller/sellerProductSlice';
+import productSlice from './customer/ProductSlice';
+import authSlice from './AuthSlice'
+import cartSlice from './customer/CartSlice';
+
+
+
+const rootReducer = combineReducers({
+    seller: sellerSlice,
+    sellerProduct: sellerProductSlice,
+    product: productSlice,
+    auth: authSlice,
+    cart: cartSlice,
+})
+
+const store = configureStore ({
+    reducer: rootReducer,
+    // middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk)
+})
+
+export type AppDispatch = typeof store.dispatch;
+export type RootState = ReturnType<typeof rootReducer>;
+
+
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+
+// export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+export const useAppSelector: TypedUseSelectorHook<RootState> = (selector) => 
+    useSelector(selector, shallowEqual);
+
+export default store;
